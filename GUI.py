@@ -13,6 +13,11 @@ cap = cv2.VideoCapture(0)
 class Initializer:
     def __init__(self):
         self.knownCount = 0
+        self.capWidth = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
+        self.capHeight = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+
+        print("width: ", self.capWidth)
+        print("height: ", self.capHeight)
 
         # 얼굴 인코딩 값을 배열로 저장
         self.label_ids = []
@@ -40,7 +45,7 @@ class Initializer:
 
 
 class RecognizeFace:
-    def __init__(self, initializer, view):
+    def __init__(self, initializer):
         self.init = initializer
 
         # Initialize some variables
@@ -113,7 +118,12 @@ class RecognizeFace:
     def computeVision(self):
         if view.viewVariable == 0:
             img = self.returnImg()
-            img = cv2.resize(img, dsize=(0, 0), fx=0.15, fy=0.15)
+            if init.capWidth > init.capHeight:
+                a = 320 / init.capWidth
+                img = cv2.resize(img, dsize=(0, 0), fx=a, fy=a)
+            else:
+                a = 320 / init.capHeight
+                img = cv2.resize(img, dsize=(0, 0), fx=a, fy=a)
             img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
             img_rgb = Image.fromarray(img_rgb)
             img_tkinter = ImageTk.PhotoImage(image=img_rgb)
@@ -451,7 +461,12 @@ class View:
         cv2.imwrite("img/tmp.jpg", cam)
 
         # 사진 넘겨주기
-        img = cv2.resize(cam, dsize=(0, 0), fx=0.15, fy=0.15)
+        if init.capWidth > init.capHeight:
+            a = 320 / init.capWidth
+            img = cv2.resize(cam, dsize=(0, 0), fx=a, fy=a)
+        else:
+            a = 320 / init.capHeight
+            img = cv2.resize(cam, dsize=(0, 0), fx=a, fy=a)
         img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         img_rgb = Image.fromarray(img_rgb)
         img_tkinter = ImageTk.PhotoImage(image=img_rgb)
@@ -756,7 +771,7 @@ if __name__ == '__main__':
     init = Initializer()
     view = View(init)
 
-    rf = RecognizeFace(init, view)
+    rf = RecognizeFace(init)
 
     rf.computeVision()
     view.window.mainloop()
